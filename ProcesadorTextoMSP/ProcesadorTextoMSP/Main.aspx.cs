@@ -9,89 +9,163 @@ namespace ProcesadorTextoMSP
 {
     public partial class Main : System.Web.UI.Page
     {
-        private  static HashSet<Char> vocales;
+        private static HashSet<Char> vocales;
         protected void Page_Load(object sender, EventArgs e)
         {
-            vocales = new HashSet<Char> { 'a', 'e', 'i', 'o' , 'u'};
+            vocales = new HashSet<Char> { 'a', 'e', 'i', 'o', 'u' };
         }
-        private static String ProcesaTexto(String texto, int lineas)// procesa el texto
+        private static String ProcesaXSilabas(int columnas, String texto)
         {
-            String exit = "";
-            String nextLine = "";
-            String posLine = ""; // salida con el ultimo espacio
-            int antI = 0; // parametro para recordar donde se encontro el ultimo espacio
-            int c = 0;
-            
-            Boolean espacio = false;
-            for (int i = 0; i < texto.Length; i++)
+            String salida = "<br />";
+            int c = -1;
+            Boolean final = false;
+            Boolean escribo = false;
+            int lineStart = 0;
+            int p = 0;
+            while (c < texto.Length)
             {
-                if (texto[i] == ' ')
+                if (columnas == 1)
                 {
-                    posLine = nextLine;
-                    espacio = true;
-                    antI = i;
+                    for (int i = 0; i <= texto.Length; i++)
+                    {
+                        salida += texto[i] + "<br />";
+                    }
                 }
-                nextLine += texto[i];
-                c++;
-                if (c == 1 && texto[i] == ' ') //para que no se empiece una linea con un espacio en el caso de que la linea anterior acabara con una palabra completa
+                else
                 {
-                    nextLine = "";
-                    c--;
-                }
-                if (c == lineas || i == texto.Length - 1)// si se llega al límite o se acaba el texto
-                {
-                    if (i < texto.Length - 1)
+                    //preparando el c y el comienzo de linea
+                    if (c + columnas < texto.Length - 1)
                     {
-                        if (texto[i + 1] == ' ') espacio = false; // si se ha alcanzado el final de una palabra no hace falta volver al espacio anterior
+                        c += columnas;
+                        while (texto[lineStart] == ' ')//evitar espacios al comienzo
+                        {
+                            if (c < texto.Length - 1) c++;
+                            if (lineStart > texto.Length - 1) return salida;
+                            lineStart++;
+                        }
                     }
-                    if (espacio == true && i != texto.Length - 1)
+                    else //si estamos al final
                     {
-                        nextLine = posLine;
-                        i = antI;
+                        c = texto.Length - 1;
+                        while (texto[lineStart] == ' ')
+                        {
+                            lineStart++;
+                            if (lineStart > texto.Length - 1) return salida;
+                        }
+                        final = true;
                     }
-                    if (nextLine.Length > 0)// para evitar escribir lineas con un espacio
+
+                    //analizando por silabas
+                    if (final || texto[c + 1] == ' ') //si cabe la palabra hasta el final
                     {
-                        exit += "<br />" + nextLine;
+                        for (int i = lineStart; i <= c; i++) salida += texto[i];
+                        if (!final)
+                        {
+                            salida += "<br />";
+                            lineStart = c + 1;
+                        }
+                        else break;
                     }
-                    c = 0;
-                    espacio = false;
-                    nextLine = "";
+                    else
+                    {
+                        p = c;
+                        // si el ultimo caracter era un espacio
+                        if (texto[p] == ' ')
+                        {
+                            for (int i = lineStart; i < p; i++) salida += texto[i];
+                            salida += "<br />";
+                            lineStart = p + 1;
+                            c = p;
+                            continue;
+                        }
+                        while (p >= lineStart)
+                        {
+                            p--;
+                            // si encontramos un espacio
+                            if (texto[p] == ' ')
+                            {
+                                for (int i = lineStart; i < p; i++) salida += texto[i];
+                                salida += "<br />";
+                                lineStart = p + 1;
+                                c = p;
+                                continue;
+                            }
+                            else
+                            {
+                                //hemos caido en vocal
+                                if (vocales.Contains(texto[p]))
+                                {
+                                    if (vocales.Contains(texto[p + 1]))
+                                    {
+                                        escribo = true;
+                                        if (texto[p] == 'u' && (texto[p + 1] == 'e' || texto[p + 1] == 'i'))
+                                        {
+                                            if (p - 1 >= 0)
+                                            {
+                                                if (texto[p - 1] == 'q') escribo = false;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (vocales.Contains(texto[p + 2])) escribo = true;
+                                        else if ((texto[p + 1] == 'c' && texto[p + 2] == 'h') || texto[p + 2] == 'r' || texto[p + 2] == 'l') escribo = true;
+                                    }
+                                }
+                                //hemos caido en consonante
+                                else
+                                {
+                                    if (!vocales.Contains(texto[p + 1]))
+                                    {
+                                        if ((texto[p] != 'c' || texto[p + 1] != 'h') && (vocales.Contains(texto[p + 2]) && (texto[p + 1] != 'r' && texto[p + 1] != 'l'))) escribo = true;
+                                        else
+                                        {
+                                            if (p + 3 < texto.Length)
+                                            {
+                                                if ((texto[p + 1] == 'c' && texto[p + 2] == 'h') || (vocales.Contains(texto[p + 3]) && (texto[p + 2] == 'r' || texto[p + 2] == 'l'))) escribo = true;
+                                            }
+                                        }
+                                    }
+
+                                }
+
+                            }
+                            if (escribo)
+                            {
+                                for (int i = lineStart; i <= p; i++) salida += texto[i];
+                                salida += "-" + "<br />";
+                                lineStart = p + 1;
+                                c = p;
+                                escribo = false;
+                                continue;
+                            }
+                            // si solo nos queda una letra y no nos ha cabido una silaba
+                            if (p == lineStart && !escribo)
+                            {
+                                for (int i = lineStart; i < c; i++) salida += texto[i];
+                                salida += "-" + "<br />";
+                                escribo = false;
+                                lineStart = c--;
+                            }
+                        }
+                    }
                 }
             }
-            return exit;
-        }
-
-
-        private static String ProcesaSilabas(int columnas, String nextline, int espacio, String nextChars)
-        {
-            int end = nextline.Length -1;
-            if (vocales.Contains(nextline[end])){
-                if (vocales.Contains(nextChars[0]))
-                {
-                    return nextline;
-                }
-            }
-                
-            
-            //vocal + vocal -> separa
-            //vocal + consonante + consonante si no es rr o ll o ch separa despues de la primera cons
-            //vocal + conssonante + consonante || + consonante  pero si la tercera es una r o una l separar rn la primera
-
-
-            return "";
+            return salida;
         }
 
         protected void ProcButton_Click(object sender, EventArgs e)
         {
-             
+
             String texto = Texto.Text;
             int columnas;
-            if (Int32.TryParse(Columnas.Text, out columnas));
-            else {
+            if (Int32.TryParse(Columnas.Text, out columnas)) ;
+            else
+            {
                 String message = Columnas.Text + " no es un número";
                 ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + message + "');", true);
             }
-            TextoProcesadoLabel.Text = ProcesaTexto(texto, columnas);
+            TextoProcesadoLabel.Text = ProcesaXSilabas(columnas, texto);
         }
     }
 }

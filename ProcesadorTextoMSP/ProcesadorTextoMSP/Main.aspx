@@ -22,10 +22,10 @@
             <asp:TextBox ID="Texto" runat="server" Height="22px" Width="742px"></asp:TextBox>
             <asp:Button ID="ProcButton" runat="server" OnClick="ProcButton_Click" Text="Procesar" Width="144px" ForeColor="Blue" />
             <br />
-            <br />
             <pre>
-                 <asp:Label ID="TextoProcesadoLabel" runat="server"></asp:Label>
+ <asp:Label ID="TextoProcesadoLabel" runat="server"></asp:Label>                     
             </pre>
+            <br />                
             <br />
             <br />
             <br />
