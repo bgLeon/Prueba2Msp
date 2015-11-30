@@ -9,8 +9,8 @@
 
 </head>
 <body>
-    <form id="form1" runat="server">
-        <div>
+    <form id="form1" runat="server" >
+        <div style="margin-left: 13px" >
             Procesador de Texto MSP<br />
             <br />
             <br />

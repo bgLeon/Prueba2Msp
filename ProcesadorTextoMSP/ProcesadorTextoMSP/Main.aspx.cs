@@ -44,7 +44,7 @@ namespace ProcesadorTextoMSP
                             lineStart++;
                         }
                     }
-                    else //si estamos al final
+                    if (c >= texto.Length-1)//si estamos al final
                     {
                         c = texto.Length - 1;
                         while (texto[lineStart] == ' ')
