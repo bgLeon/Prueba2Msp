@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Home Page" Language="C#" AutoEventWireup="true" CodeBehind="Main.aspx.cs" Inherits="ProcesadorTextoMSP.Main" %>
+﻿<%@ Page Title="Home Page" Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="ProcesadorTextoMSP.Main" %>
 
 <!DOCTYPE html>
 
