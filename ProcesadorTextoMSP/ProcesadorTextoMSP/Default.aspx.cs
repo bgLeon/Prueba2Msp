@@ -40,11 +40,12 @@ namespace ProcesadorTextoMSP
                         while (texto[lineStart] == ' ')//evitar espacios al comienzo
                         {
                             if (c < texto.Length - 1) c++;
+                            if (c == texto.Length - 1) final=true;
                             if (lineStart > texto.Length - 1) return salida;
                             lineStart++;
                         }
                     }
-                    if (c + columnas >= texto.Length-1)//si estamos al final
+                    else //si estamos al final
                     {
                         c = texto.Length - 1;
                         while (texto[lineStart] == ' ')
